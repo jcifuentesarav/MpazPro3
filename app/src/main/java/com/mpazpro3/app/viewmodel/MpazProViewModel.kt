@@ -293,5 +293,9 @@ class MpazProViewModel : ViewModel() {
             return
         }
 
+        val seguimiento = _seguimientos.value.find { it.estudianteId == estudianteId }
+        val contenidoId = seguimiento?.contenidoId ?: "C2"
+        val respuestas = seguimiento?.respuestas ?: emptyList()
+
 
 
