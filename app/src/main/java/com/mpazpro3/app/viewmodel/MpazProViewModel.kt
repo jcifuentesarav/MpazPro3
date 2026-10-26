@@ -315,4 +315,58 @@ val rendimientoStr = "$correctas de $totalRespuestas correctas ($porcentaje%)"
 val fortalezas = mutableListOf<String>()
 val aspectosAReforzar = mutableListOf<String>()
 
+if (correctas > 0) {
+            fortalezas.add("Respondió correctamente $correctas preguntas de la unidad.")
+        }
+        if (porcentaje >= 70) {
+            fortalezas.add("Demuestra un buen nivel de comprensión en los conceptos evaluados.")
+        }
 
+        if (incorrectas > 0) {
+            aspectosAReforzar.add("Se sugiere repasar y ejercitar los conceptos de las $incorrectas preguntas incorrectas.")
+        }
+        if (porcentaje < 70) {
+            aspectosAReforzar.add("Reforzar la lectura comprensiva de los enunciados antes de contestar.")
+        }
+
+        if (fortalezas.isEmpty()) fortalezas.add("Participación activa en las actividades asignadas.")
+        if (aspectosAReforzar.isEmpty()) aspectosAReforzar.add("Continuar practicando para afianzar el aprendizaje.")
+
+        val fechaActual = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+
+        val nuevoInforme = InformeDocente(
+            id = informeExistente?.id ?: UUID.randomUUID().toString(),
+            estudianteId = estudianteId,
+            contenidoId = contenidoId,
+            rendimiento = rendimientoStr,
+            fortalezas = fortalezas,
+            aspectosAReforzar = aspectosAReforzar,
+            fecha = fechaActual
+        )
+
+        val listaActualizada = _informes.value.toMutableList()
+        if (informeExistente != null) {
+            val index = listaActualizada.indexOf(informeExistente)
+            if (index != -1) listaActualizada[index] = nuevoInforme
+        } else {
+            listaActualizada.add(nuevoInforme)
+        }
+
+        _informes.value = listaActualizada
+    }
+
+    fun validarInforme(informeId: String) {
+        val informeActual = _informes.value.find { it.id == informeId }
+
+        if (informeActual != null && informeActual.estado == EstadoValidacion.BORRADOR) {
+            val informeValidado = informeActual.copy(estado = EstadoValidacion.VALIDADO)
+
+            val listaActualizada = _informes.value.toMutableList()
+            val index = listaActualizada.indexOfFirst { it.id == informeId }
+            if (index != -1) {
+                listaActualizada[index] = informeValidado
+                _informes.value = listaActualizada
+            }
+        }
+    }
+}
